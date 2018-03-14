@@ -9,13 +9,29 @@ module.exports = (req, res) => {
   }
   if (!db.get('skills').value()) {
     db.defaults({ skills: [] }).write();
+    db.get('skills')
+      .push({ number: age, text: 'Возраст начала занятий на скрипке' })
+      .push({ number: concerts, text: 'Концертов отыграл' })
+      .push({ number: cities, text: 'Максимальное число городов в туре' })
+      .push({ number: years, text: 'Лет на сцене в качестве скрипача' })
+      .write();
   }
-  db.get('skills').remove().write();
+  const arrOfNumbers = [];
+  Object.keys(req.body).map((key) => {
+    let value = req.body[key];
+    arrOfNumbers.push(value);
+  });
+  db._.mixin({
+    upNumber: (array) => {
+      for (let i = 0; i < array.length; i++) {
+        array[i] = arrOfNumbers[i];
+      }
+      return array;
+    }
+  });
+
   db.get('skills')
-    .push({ number: age, text: 'Возраст начала занятий на скрипке' })
-    .push({ number: concerts, text: 'Концертов отыграл' })
-    .push({ number: cities, text: 'Максимальное число городов в туре' })
-    .push({ number: years, text: 'Лет на сцене в качестве скрипача' })
+    .upNumber()
     .write();
   res.render('pages/admin', { msgskill: 'Данные успешно изменены' });
 };
